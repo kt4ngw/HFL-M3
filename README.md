@@ -19,6 +19,12 @@ Prior to training, the framework organizes MCs into virtual groups with approxim
 During training, it establishes logical mappings between each ES’s physical MC group and its corresponding target virtual group, and applies local adjustments exclusively to mismatched MCs.
 This design promotes more class-balanced gradient aggregation at the ESs, thereby facilitating faster convergence of the global model.
 
+<p align="center">
+  <img src="./pic/HFL-M3.png" width="500"><br>
+  <em>Fig 1. The proposed HFL-M3 framework.</em>
+</p>
+
+
 ### 3. Experiments
 ```
 python main.py --server proposed
