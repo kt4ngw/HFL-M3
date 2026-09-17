@@ -1,3 +1,5 @@
+# HFL-M3 -- https://github.com/kt4ngw/HFL-M3
+# Copyright (c) 2026 Jian Tang. Academic use only; see LICENSE and cite the HFL-M3 paper.
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -13,7 +15,7 @@ class FMnist_CNN(nn.Module):
 
 
         self.linear = nn.Linear(512, 10)
-        self.feature_extractor = nn.Sequential(self.conv1, nn.ReLU(), self.pool1, self.conv2, nn.ReLU(), self.pool2, nn.Flatten(), 
+        self.feature_extractor = nn.Sequential(self.conv1, nn.ReLU(), self.pool1, self.conv2, nn.ReLU(), self.pool2, nn.Flatten(),
                                                self.fc1, nn.ReLU())
         self.classifier = nn.Sequential(self.linear)
     def forward(self, inputs):
@@ -21,7 +23,7 @@ class FMnist_CNN(nn.Module):
         feature = self.feature_extractor(tensor)
         predict = self.classifier(feature)
         return feature, predict
-    
+
 
     def get_model_size(self, part='full'):
         total_params = 0
@@ -55,7 +57,7 @@ class FMnist_CNN(nn.Module):
     #         nn.ReLU(),
     #         nn.Linear(512, 10)
     #     )
-        
+
     # def forward(self, x):
     #     x = self.conv(x)
     #     x = x.view(-1, 64*4*4)
@@ -64,11 +66,11 @@ class FMnist_CNN(nn.Module):
     #     return x
 if __name__ == '__main__':
     model = FMnist_CNN()
-    
+
     # Calculate and print the size of the full model
     total_model_size = model.get_model_size('full')
     print(f"Total model size: {total_model_size:.2f} MB")
-    
+
     # Calculate and print the size of the classifier part
     classifier_size = model.get_model_size('classifier')
     print(f"Classifier size: {classifier_size:.2f} MB")

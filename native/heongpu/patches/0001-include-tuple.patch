@@ -1,0 +1,11 @@
+diff --git a/src/lib/host/ckks/cosine_approx.cu b/src/lib/host/ckks/cosine_approx.cu
+--- a/src/lib/host/ckks/cosine_approx.cu
++++ b/src/lib/host/ckks/cosine_approx.cu
+@@ -14,6 +14,7 @@
+ #include <cmath>
+ #include <algorithm>
+ #include <iostream>
++#include <tuple>
+ #include <heongpu/host/ckks/cosine_approx.cuh>
+ 
+ using namespace NTL;

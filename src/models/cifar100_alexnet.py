@@ -3,11 +3,11 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-num_classes = 10
+num_classes = 20
 
-class CIFAR10_AlexNet(nn.Module):
-    def __init__(self, num_classes=10, init_weights=False):
-        super(CIFAR10_AlexNet, self).__init__()
+class CIFAR100_AlexNet(nn.Module):
+    def __init__(self, num_classes=20, init_weights=False):
+        super(CIFAR100_AlexNet, self).__init__()
         self.layer1 = torch.nn.Sequential(torch.nn.Conv2d(3, 64, kernel_size=4, stride=2, padding=2),
                                           torch.nn.GroupNorm(8, 64),
                                           torch.nn.ReLU(inplace=True),
@@ -42,42 +42,41 @@ class CIFAR10_AlexNet(nn.Module):
                                        torch.nn.ReLU(inplace=True))
 
         self.linear = torch.nn.Linear(1024, num_classes)
-        if init_weights:
-            self._initialize_weights()
+
         self.feature_extractor = nn.Sequential(self.layer1, self.layer2, self.layer3, self.layer4, self.layer5,
                                                self.avgpool, nn.Flatten(), self.fc1, self.fc2)
+
         self.classifier = nn.Sequential(self.linear)
+
+
+        if init_weights:
+            self._initialize_weights()
 
     def forward(self, x):
         x = x.view(-1, 3, 32, 32)
-
         feature = self.feature_extractor(x)
         pred = self.classifier(feature)
 
         return feature, pred
 
-    def get_model_size(self, part='full'):
+    def get_model_size(self, ):
         total_params = 0
-        model_part = self
-        # Select part of the model to calculate parameters
-        if part == 'classifier':
-            model_part = self.classifier
-
-        # Calculate parameters
-        for name, param in model_part.named_parameters():
+        for name, param in CIFAR100_AlexNet().named_parameters():
             layer_params = param.numel()
             total_params += layer_params
+            # print(f"{name}: {layer_params} parameters")
+        total_params_kb = (total_params * 4) / 1024 / 1024
+        return total_params_kb
 
-        total_params_mb = (total_params * 4) / 1024 / 1024
-        return total_params_mb
+    def feature2logit(self, x):
+        return self.classifier(x)
 
 if __name__ == '__main__':
-    model = CIFAR10_AlexNet()
-
-    # Calculate and print the size of the full model
-    total_model_size = model.get_model_size('full')
-    print(f"Total model size: {total_model_size:.2f} MB")
-
-    # Calculate and print the size of the classifier part
-    classifier_size = model.get_model_size('classifier')
-    print(f"Classifier size: {classifier_size:.2f} MB")
+    # Calculate and print parameters for each layer
+    total_params = 0
+    for name, param in CIFAR100_AlexNet().named_parameters():
+        layer_params = param.numel()
+        total_params += layer_params
+        print(f"{name}: {layer_params} parameters")
+    total_params_kb = (total_params * 4) / 1024 / 1024
+    print(f"Total model parameters: {total_params_kb:.2f} MB")

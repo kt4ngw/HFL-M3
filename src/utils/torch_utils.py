@@ -1,6 +1,7 @@
-"""
-Referred from https://github.com/lx10077/rlpy/blob/master/utils/torchs.py
-"""
+# HFL-M3 -- https://github.com/kt4ngw/HFL-M3
+# Copyright (c) 2026 Jian Tang. Academic use only; see LICENSE and cite the HFL-M3 paper.
+# Copied from lx10077/fedavgpy src/utils/torch_utils.py (MIT License,
+# Copyright (c) 2019 lx10077), which credits lx10077/rlpy utils/torchs.py.
 
 import torch
 import math

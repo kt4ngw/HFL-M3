@@ -1,3 +1,6 @@
+# HFL-M3 -- https://github.com/kt4ngw/HFL-M3
+# Copyright (c) 2026 Jian Tang. Academic use only; see LICENSE and cite the HFL-M3 paper.
+# Portions adapted from lx10077/fedavgpy (MIT License).
 from torch.optim import Optimizer
 from torch.optim.optimizer import required
 
@@ -43,26 +46,22 @@ class GD(Optimizer):
         lr = self.lr * (0.5 ** (round_i // 10))
         for param_group in self.param_groups:
             param_group['lr'] = lr
- 
+
     def soft_decay_learning_rate(self, dataset, dirichlet):
-        if dirichlet == 0.01 and dataset == 'cifar10':
-            self.lr *= 0.96
-        elif dirichlet == 0.01 and dataset == 'cifar100':
-            self.lr *= 0.96
-        elif dataset == 'cifar100':
-            self.lr *= 0.98
-        elif dataset == 'svhn':
-            self.lr *= 0.98
+        if dataset == 'cifar100':
+            self.lr = self.lr
         else:
-            self.lr *= 0.9992
-        # self.lr *= 0.99   
+            self.lr *= 0.99
         for param_group in self.param_groups:
             param_group['lr'] = self.lr
-    def soft_decay_learning_rate2(self):
-        self.lr *= 0.95
+    def soft_decay_learning_rate2(self, dataset):
+        if dataset == 'cifar100':
+            self.lr *= 0.99
+        else:
+            self.lr *= 0.99
         for param_group in self.param_groups:
             param_group['lr'] = self.lr
-            
+
     def inverse_prop_decay_learning_rate(self, round_i):
         # self.lr *= 0.99
         # for param_group in self.param_groups:

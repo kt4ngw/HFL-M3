@@ -1,0 +1,60 @@
+HFL-M3 Academic Research License
+
+Copyright (c) 2026 Jian Tang. All rights reserved.
+
+This repository contains the reference implementation of:
+
+  J. Tang, X. Xia, I. Khalil, M. Kou, M. Liwang, J. S. Ng, X. Li, and X. Wang,
+  "Accelerating Hierarchical Federated Learning under Mobility via Model
+  Migration in Cloud-Edge-End Collaborative Networks".
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to use,
+copy, modify, and distribute the Software for ACADEMIC AND NON-COMMERCIAL
+RESEARCH PURPOSES ONLY, subject to the following conditions:
+
+1. Attribution. Any publication, report, thesis, or software that uses the
+   Software, in whole or in part, or that is derived from it, must cite the
+   paper above and acknowledge this repository
+   (https://github.com/kt4ngw/HFL-M3).
+
+2. Notice preservation. The copyright notice, this license, and the file
+   headers identifying the author and the paper must be retained in all copies
+   or substantial portions of the Software, including modified versions.
+   Removing, obscuring, or altering these notices is prohibited.
+
+3. No misrepresentation. The Software, or any derivative of it, may not be
+   presented as original work of a third party, nor may the underlying method
+   be republished as a new contribution without clear reference to the paper
+   above.
+
+4. Non-commercial. Commercial use of the Software, in whole or in part,
+   requires prior written permission from the copyright holder.
+
+Third-party code
+
+The license above covers the original contributions of the author. The
+following portions are adapted from third-party sources and remain under their
+original licenses, whose notices are retained in the corresponding files:
+
+  - src/utils/torch_utils.py: copied from lx10077/fedavgpy
+    (src/utils/torch_utils.py), which credits lx10077/rlpy utils/torchs.py.
+  - src/optimizers/gd.py and src/utils/metrics.py: portions adapted from
+    lx10077/fedavgpy.
+
+  lx10077/fedavgpy is distributed under the MIT License,
+  Copyright (c) 2019 lx10077. The MIT License permits use, copying and
+  modification provided that the above copyright notice and the permission
+  notice are included in all copies or substantial portions of the software.
+  - src/getdata.py: IDX and CIFAR reading helpers adapted from the TensorFlow
+    MNIST tutorial (Apache License 2.0) and Stanford CS231n data_utils.py.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+Contact: Jian Tang (GitHub: kt4ngw)

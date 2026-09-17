@@ -1,3 +1,5 @@
+# HFL-M3 -- https://github.com/kt4ngw/HFL-M3
+# Copyright (c) 2026 Jian Tang. Academic use only; see LICENSE and cite the HFL-M3 paper.
 from torch.utils.data import DataLoader, RandomSampler
 import torch.nn.functional as F
 import time
@@ -17,23 +19,52 @@ from src.utils.torch_utils import *
 import logging
 class Client():
     def __init__(self, options, idx, model, optimizer):
-        self.logger = logging.getLogger(__name__)  # 继承全局 logger
+        self.logger = logging.getLogger(__name__)
         self.options = options
         self.idx = idx
         self.model = model
         self.optimizer = optimizer
         self.gpu = options['gpu']
-        self.train_dir = f"{self.options['data_path']}/client_{self.idx + 1}"  # 一位小数
-        train_data = np.load(f"{self.train_dir}/train_data.npy")
-        y = train_data[:, -1]   # 最后一列是标签
-        self.data_count = len(y) 
-    
+        self.train_dir = f"{self.options['data_path']}/client_{self.idx + 1}"
+        train_data = np.load(f"{self.train_dir}/train_data.npy", mmap_mode='r')
+        # Only the total local sample count is exposed to the server-side
+        # estimator; per-class counts remain local to the client.
+        self.data_count = int(train_data.shape[0])
+
     def get_flat_model_params(self):
         flat_params = get_flat_params_from(self.model)
         return flat_params.detach()
 
     def set_flat_model_params(self, flat_params):
         set_flat_params_to(self.model, flat_params)
+
+    def pretrain_for_distribution(self, epochs):
+        """Return a warm-up model used only to estimate this client's labels.
+
+        Every client is reset to the same initial model by the caller.  A
+        full-batch update follows the estimator used in ICC-J-P and avoids
+        exposing the client's per-class sample counts.
+        """
+        if epochs <= 0:
+            raise ValueError("pretrain epochs must be positive")
+
+        train_data = np.load(f"{self.train_dir}/train_data.npy")
+        X = torch.tensor(train_data[:, :-1], dtype=torch.float32)
+        y = torch.tensor(train_data[:, -1], dtype=torch.long)
+        loader = DataLoader(TensorDataset(X, y), batch_size=len(y), shuffle=False)
+
+        self.model.train()
+        for _ in range(int(epochs)):
+            for batch_x, batch_y in loader:
+                if self.gpu >= 0:
+                    batch_x, batch_y = batch_x.cuda(), batch_y.cuda()
+                self.optimizer.zero_grad()
+                _, prediction = self.model(batch_x)
+                loss = criterion(prediction, batch_y)
+                loss.backward()
+                self.optimizer.step()
+
+        return self.get_flat_model_params()
 
 
     def local_train(self, ):
@@ -45,13 +76,10 @@ class Client():
         return (dict["size"], local_model_paras), stats
 
     def local_update(self, options):
-        train_dir = f"{self.options['data_path']}/client_{self.idx + 1}"  # 一位小数
+        train_dir = f"{self.options['data_path']}/client_{self.idx + 1}"
         train_data = np.load(f"{train_dir}/train_data.npy")
-        # 数据拆分为输入特征（X）和标签（y）
-        # X = train_data[:, :-1].reshape(-1, 3, 32, 32)    # 假设最后一列是标签
-        X = train_data[:, :-1]    # 假设最后一列是标签
-        y = train_data[:, -1]   # 最后一列是标签
-        # 转换为PyTorch tensor
+        X = train_data[:, :-1]
+        y = train_data[:, -1]
         X = torch.tensor(X, dtype=torch.float32)
         y = torch.tensor(y, dtype=torch.long)
         local_dataset = TensorDataset(X, y)
@@ -61,14 +89,13 @@ class Client():
         else:
             if len(local_dataset) < options['batch_size']:
                 localTrainDataLoader = DataLoader(local_dataset, batch_size=len(local_dataset), shuffle=True)
-                used_indices = list(range(len(local_dataset)))  # 全部样本
+                used_indices = list(range(len(local_dataset)))
             else:
                 sampler = RandomSampler(local_dataset, replacement=False, num_samples=1 * options['batch_size'])
                 used_indices = list(sampler)
                 # print("used_", used_indices)
                 localTrainDataLoader = DataLoader(local_dataset, batch_size=options['batch_size'], sampler=sampler)
                 # localTrainDataLoader = DataLoader(local_dataset, batch_size=options['batch_size'], shuffle=True)
-        # print(f"本轮训练使用的样本索引: {used_indices}")
         self.model.train()
         train_loss = train_acc = train_total = 0
         for epoch in range(options['local_epoch']):
@@ -88,7 +115,7 @@ class Client():
                 train_loss += loss.item() * y.size(0)
                 train_acc += correct
                 train_total += target_size
-           # local_model_paras = self.get_model_parameters()   
+           # local_model_paras = self.get_model_parameters()
         # print(self.get_flat_model_params())
         local_model_paras = self.get_flat_model_params()
         return_dict = {"size": len(train_data[:, :-1]),
@@ -96,7 +123,7 @@ class Client():
                        "loss": train_loss / train_total,
                        "acc": train_acc / train_total}
         return local_model_paras, return_dict
-    
+
 
     # def getLocalEngery(self, round_i):
     #     if len(self.local_dataset) < self.options['batch_size']:
@@ -112,23 +139,20 @@ class Client():
 
     def getLocalDelay(self, round_i, system_params):
         if self.data_count < self.options['batch_size']:
-            dataset_len = self.data_count 
+            dataset_len = self.data_count
         else:
             dataset_len = self.options['batch_size']
         localDelay = (self.options['C'] * dataset_len * self.options['local_epoch']) / (system_params['cpu_frequency'][round_i][self.idx] * 10 ** 9)
         return localDelay
 
     def getUploadDelay(self, round_i, system_params):
-        # R_K =  system_params['bandwidth_ul'][round_i][self.idx] * 1000000 * np.log2(1 + system_params['transmit_power'][self.idx] * 8) # 1M bit / s / self.B
-        # # print("R_K", system_params['bandwidth_ul'][round_i][-1])
-        # uploadDelay = self.options['model_size'] / (R_K / 8 / 1024 / 1024) # 100KB 0.1M  # 1S
-        uploadDelay = self.options['model_size'] / (system_params['U'][round_i][self.idx])
+        # model_size is MB and U is Mbps.
+        uploadDelay = 8.0 * self.options['model_size'] / (system_params['U'][round_i][self.idx])
         return uploadDelay
 
     def get_downmodel_latency(self, round_i, system_params):
-        # Down_R_K = system_params['bandwidth_dl'][round_i][self.idx] * 1000000 * np.log2(1 + system_params['transmit_power'][self.idx] * 8)
-        # down_model_latency = self.options['model_size'] / (Down_R_K / 8 / 1024 / 1024)
-        down_model_latency = self.options['model_size'] / (system_params['D'][round_i][self.idx])
+        # model_size is MB and D is Mbps.
+        down_model_latency = 8.0 * self.options['model_size'] / (system_params['D'][round_i][self.idx])
         return down_model_latency
 
     # def getSumEngery(self, round_i):

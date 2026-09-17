@@ -1,0 +1,8 @@
+numpy
+scipy
+colorama
+tensorboardX
+pytest
+# Install matching torch/torchvision wheels for your CPU/CUDA environment.
+torch
+torchvision
