@@ -2,7 +2,7 @@
 
 ## Accelerating Hierarchical Federated Learning under Mobility via Model Migration in Cloud–Edge–End Collaborative Networks
 
-The paper has been submitted by IEEE Trans. Mobile Comput.
+The paper has been accepted by IEEE Trans. Mobile Comput.
 
 **Title:** Accelerating Hierarchical Federated Learning under Mobility via Model Migration in Cloud–Edge–End Collaborative Networks
 
@@ -264,14 +264,21 @@ tests/                         HEonGPU backend integration test
 
 ## Citation
 
-If you use this code or build upon it, please cite the paper:
+If this code was helpful for you, could you please cite this paper and give a star to this project? I really appreciate that!
+
+```
+J. Tang, X. Xia, I. Khalil, M. Kou, M. Liwang, J. S. Ng, X. Li and X. Wang, "Accelerating Hierarchical Federated Learning under Mobility via Model Migration in Cloud-Edge-End Collaborative Networks," in IEEE Transactions on Mobile Computing, doi: 10.1109/TMC.2026.3748371.
+```
+
+or (BibTeX)
 
 ```bibtex
-@article{tang2026hflm3,
-  title   = {Accelerating Hierarchical Federated Learning under Mobility via Model Migration in Cloud-Edge-End Collaborative Networks},
-  author  = {Tang, Jian and Xia, Xiaoyu and Khalil, Ibrahim and Kou, Mengsha and Liwang, Minghui and Ng, Jer Shyuan and Li, Xiuhua and Wang, Xianbin},
-  year    = {2026}
-}
+@ARTICLE{HFLM3,
+  author={Tang, Jian and Xia, Xiaoyu and Khalil, Ibrahim and Kou, Mengsha and Liwang, Minghui and Ng, Jer Shyuan and Li, Xiuhua and Wang, Xianbin},
+  journal={{IEEE} Trans. Mobile Comput.},
+  title={Accelerating Hierarchical Federated Learning under Mobility via Model Migration in Cloud-Edge-End Collaborative Networks},
+  year={2026},
+  doi={10.1109/TMC.2026.3748371}}
 ```
 
 ## License
